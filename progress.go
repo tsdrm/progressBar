@@ -1,5 +1,10 @@
 package progressBar
 
+import (
+	"sync"
+	"time"
+)
+
 type MODEL_TYPE int
 
 const (
@@ -20,28 +25,37 @@ type Progress struct {
 }
 
 type Shower interface {
-	Show(c, t int)
+	Show(c, t int, prefix, suffix string)
 }
 
-func NewBar(total int, model MODEL_TYPE, prefix, suffix string) *Progress {
+func NewBar(total int, model MODEL_TYPE, prefix, suffix string, isPercentage bool) *Progress {
 	if total < 1 {
 		panic("Total must be greater than 0")
 	}
-	return &Progress{
+
+	var progress = &Progress{
 		Total:   total,
 		Current: 0,
 
-		Model:  model,
-		Prefix: prefix,
-		Suffix: suffix,
+		isPercentage: isPercentage,
+		Model:        model,
+		Prefix:       prefix,
+		Suffix:       suffix,
+		shower:       GetShower(model),
 	}
+
+	return progress
 }
 
-func (b *Progress) Percentage() int {
-	if b.Current == 0 {
-		return 0
+func GetShower(model MODEL_TYPE) Shower {
+	switch model {
+	case MODEL_NUMBER:
+		return Number{}
+	case MODEL_PROCESS:
+		return Bar{}
+	default:
+		return Bar{}
 	}
-	return b.Current / b.Total
 }
 
 func (b *Progress) Count(n int) int {
@@ -53,11 +67,32 @@ func (b *Progress) Count(n int) int {
 }
 
 func (b *Progress) Start() {
+	var wg = &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
-		c, t := b.Current, b.Total
-		if b.isPercentage {
-			c, t = b.Percentage(), 100
-		}
-		b.shower.Show(c, t)
+		defer wg.Done()
+		b.shower.Show(b.Current, b.Total, b.Prefix, b.Suffix)
 	}()
+	wg.Wait()
+}
+
+type ProgressGroup struct {
+	Progresses []*Progress
+	Interval   time.Duration
+}
+
+func (pg *ProgressGroup) sleep() {
+	time.Sleep(pg.Interval * time.Millisecond)
+}
+
+func (pg *ProgressGroup) MoveUp(n int) {
+
+}
+
+func (pg *ProgressGroup) MoveDown(n int) {
+
+}
+
+func (pg *ProgressGroup) Start() {
+
 }
