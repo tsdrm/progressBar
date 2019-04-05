@@ -1,12 +1,13 @@
 package progressBar
 
 type Bar struct {
+	Base
 }
 
-func (b Bar) Percentage(c, t int) int {
-	return 0
+func (b Bar) Show(c, t int, prefix, suffix string, isPercentage bool) {
+
 }
 
-func (b Bar) Show(c, t int, prefix, suffix string) {
+func (b Bar) ShowFloatN(c, t, n int, prefix, suffix string, isPercentage bool) {
 
 }
