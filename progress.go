@@ -14,6 +14,11 @@ const (
 	MODEL_PROCESS
 )
 
+const (
+	PRO_SUCCESS uint8 = iota
+	PRO_RUNNING
+)
+
 type Progress struct {
 	Total   int
 	Current int
@@ -77,10 +82,6 @@ func (p *Progress) Count(n int) int {
 	return p.Current
 }
 
-func (p *Progress) sleep() {
-	time.Sleep(p.Interval)
-}
-
 func (p *Progress) Start() {
 	go func(progress *Progress) {
 		progress.wg.Add(1)
@@ -94,13 +95,20 @@ func (p *Progress) Start() {
 			var current = <-progress.c
 			progress.Current, _ = strconv.Atoi(current)
 		}
-		time.Sleep(time.Second)
+		fmt.Println("")
 		progress.wg.Done()
 	}(p)
 }
 
 func (p *Progress) Wait() {
 	p.wg.Wait()
+}
+
+func (p *Progress) Status() uint8 {
+	if p.Current >= p.Total {
+		return PRO_SUCCESS
+	}
+	return PRO_RUNNING
 }
 
 func (p *Progress) SetInterval(duration time.Duration) {
@@ -110,6 +118,28 @@ func (p *Progress) SetInterval(duration time.Duration) {
 type ProgressGroup struct {
 	Progresses []*Progress
 	Interval   time.Duration
+
+	CurrentLine int
+	TotalLine   int
+	SuccessNum  int
+
+	wg *sync.WaitGroup
+}
+
+func NewProcessGroup() *ProgressGroup {
+	return &ProgressGroup{
+		Progresses:  []*Progress{},
+		Interval:    time.Millisecond * 5,
+		CurrentLine: 0,
+		TotalLine:   0,
+
+		SuccessNum: 0,
+		wg:         &sync.WaitGroup{},
+	}
+}
+
+func (pg *ProgressGroup) Add(p *Progress) {
+	pg.Progresses = append(pg.Progresses, p)
 }
 
 func (pg *ProgressGroup) sleep() {
@@ -125,5 +155,27 @@ func (pg *ProgressGroup) MoveDown(n int) {
 }
 
 func (pg *ProgressGroup) Start() {
+	for _, p := range pg.Progresses {
+		go func(progress *Progress, progressGroup *ProgressGroup) {
+			progressGroup.wg.Add(1)
+			defer progressGroup.wg.Done()
 
+			fmt.Println("--------------")
+			progress.Start()
+			fmt.Println("==============")
+			progress.Wait()
+
+		}(p, pg)
+	}
+
+	//go func() {
+	//	for {
+	//
+	//		pg.sleep()
+	//	}
+	//}()
+}
+
+func (pg *ProgressGroup) Wait() {
+	pg.wg.Wait()
 }

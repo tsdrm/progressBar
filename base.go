@@ -6,14 +6,14 @@ type Base struct {
 }
 
 func (b Base) PercentageInt(c, t int) int {
-	if c == 0 {
+	if t == 0 {
 		return 0
 	}
-	return c / t
+	return int(float32(c) / float32(t) * 100)
 }
 
 func (b Base) PercentageFloatN(c, t int, n int) string {
-	if c == 0 {
+	if t == 0 {
 		return "0"
 	}
 	var format = fmt.Sprintf("%df", n)
