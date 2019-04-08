@@ -20,13 +20,19 @@ const (
 )
 
 type Progress struct {
-	Total   int
+	// total progress
+	Total int
+	// current progress
 	Current int
 
+	// whether to use percentage display
 	isPercentage bool
-	Model        MODEL_TYPE
-	Prefix       string
-	Suffix       string
+	// display style, you can choose percentage or bar
+	Model MODEL_TYPE
+	// prefix of progress
+	Prefix string
+	// suffix of progress
+	Suffix string
 
 	Interval time.Duration
 	shower   Shower
@@ -36,7 +42,9 @@ type Progress struct {
 }
 
 type Shower interface {
+	// display by integer
 	Show(c, t int, prefix, suffix string, isPercentage bool)
+	// display by floating point number
 	ShowFloatN(c, t, bitSize int, prefix, suffix string, isPercentage bool)
 }
 
@@ -122,8 +130,9 @@ func (p *Progress) Wait() {
 	p.wg.Wait()
 }
 
+// Return status of progress, p.Current == p.Total represent process is success.
 func (p *Progress) Status() uint8 {
-	if p.Current >= p.Total {
+	if p.Current == p.Total {
 		return PRO_SUCCESS
 	}
 	return PRO_RUNNING
@@ -137,22 +146,18 @@ type ProgressGroup struct {
 	Progresses []*Progress
 	Interval   time.Duration
 
-	CurrentLine int
-	TotalLine   int
-	SuccessNum  int
+	TotalLine int
 
 	wg *sync.WaitGroup
 }
 
 func NewProcessGroup() *ProgressGroup {
 	return &ProgressGroup{
-		Progresses:  []*Progress{},
-		Interval:    time.Millisecond * 5,
-		CurrentLine: 0,
-		TotalLine:   0,
+		Progresses: []*Progress{},
+		Interval:   time.Millisecond * 5,
+		TotalLine:  0,
 
-		SuccessNum: 0,
-		wg:         &sync.WaitGroup{},
+		wg: &sync.WaitGroup{},
 	}
 }
 
@@ -200,8 +205,6 @@ func (pg *ProgressGroup) Start() {
 				break
 			}
 			pg.LineMoveUp(pg.TotalLine)
-			//println(pg.TotalLine)
-			//return
 			successNum = 0
 			for _, p := range pg.Progresses {
 				if p.Status() == PRO_SUCCESS {
@@ -215,8 +218,11 @@ func (pg *ProgressGroup) Start() {
 	}()
 }
 
+// Why sleep a second at the end ?
+// It is to wait for the display thread to display complete.
+// Otherwise it might show something like 99/100.
 func (pg *ProgressGroup) Wait() {
-	time.Sleep(time.Second * 2)
 	pg.wg.Wait()
 	pg.ShowCursor()
+	time.Sleep(time.Second)
 }
