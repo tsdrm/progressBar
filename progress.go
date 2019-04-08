@@ -78,6 +78,9 @@ func (p *Progress) Count(n int) int {
 		n = 0
 	}
 	p.Current += n
+	if p.Current >= p.Total {
+		p.Current = p.Total
+	}
 	p.c <- fmt.Sprintf("%d", p.Current)
 	return p.Current
 }
@@ -92,12 +95,27 @@ func (p *Progress) Start() {
 				break
 			}
 
-			var current = <-progress.c
-			progress.Current, _ = strconv.Atoi(current)
+			var current = <-p.c
+			p.Current, _ = strconv.Atoi(current)
 		}
-		fmt.Println("")
+		close(p.c)
+		fmt.Println()
 		progress.wg.Done()
 	}(p)
+}
+
+func (p *Progress) listen() {
+	for {
+		var current = <-p.c
+		p.Current, _ = strconv.Atoi(current)
+		if p.Current == p.Total {
+			break
+		}
+	}
+}
+
+func (p *Progress) show() {
+	p.shower.Show(p.Current, p.Total, p.Prefix, p.Suffix, p.isPercentage)
 }
 
 func (p *Progress) Wait() {
@@ -140,17 +158,22 @@ func NewProcessGroup() *ProgressGroup {
 
 func (pg *ProgressGroup) Add(p *Progress) {
 	pg.Progresses = append(pg.Progresses, p)
+	pg.TotalLine ++
 }
 
 func (pg *ProgressGroup) sleep() {
 	time.Sleep(pg.Interval)
 }
 
-func (pg *ProgressGroup) MoveUp(n int) {
-
+func (pg *ProgressGroup) LineMoveUp(n int) {
+	fmt.Printf("\033[%dA", n)
 }
 
-func (pg *ProgressGroup) MoveDown(n int) {
+func (pg *ProgressGroup) LineMoveDown(n int) {
+	fmt.Printf("\033[%dB", n)
+}
+
+func (pg *ProgressGroup) LineClear() {
 
 }
 
@@ -159,21 +182,31 @@ func (pg *ProgressGroup) Start() {
 		go func(progress *Progress, progressGroup *ProgressGroup) {
 			progressGroup.wg.Add(1)
 			defer progressGroup.wg.Done()
-
-			fmt.Println("--------------")
-			progress.Start()
-			fmt.Println("==============")
-			progress.Wait()
-
+			fmt.Println()
+			progress.listen()
 		}(p, pg)
 	}
 
-	//go func() {
-	//	for {
-	//
-	//		pg.sleep()
-	//	}
-	//}()
+	go func() {
+		for {
+			// check and show
+			var successNum int = 0
+			if successNum == len(pg.Progresses) {
+				break
+			}
+			for index, p := range pg.Progresses {
+				if p.Status() == PRO_SUCCESS {
+					successNum ++
+				}
+				if index == 0 {
+					pg.Progresses[0].show()
+					//pg.LineMoveDown(5)
+					//fmt.Println()
+				}
+			}
+		}
+		//fmt.Println()
+	}()
 }
 
 func (pg *ProgressGroup) Wait() {
