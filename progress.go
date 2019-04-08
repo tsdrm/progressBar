@@ -173,11 +173,16 @@ func (pg *ProgressGroup) LineMoveDown(n int) {
 	fmt.Printf("\033[%dB", n)
 }
 
-func (pg *ProgressGroup) LineClear() {
+func (pg *ProgressGroup) HideCursor() {
+	fmt.Printf("\033[?25l")
+}
 
+func (pg *ProgressGroup) ShowCursor() {
+	fmt.Printf("\033[?25h")
 }
 
 func (pg *ProgressGroup) Start() {
+	pg.HideCursor()
 	for _, p := range pg.Progresses {
 		go func(progress *Progress, progressGroup *ProgressGroup) {
 			progressGroup.wg.Add(1)
@@ -187,28 +192,31 @@ func (pg *ProgressGroup) Start() {
 		}(p, pg)
 	}
 
+	var successNum int
 	go func() {
 		for {
 			// check and show
-			var successNum int = 0
 			if successNum == len(pg.Progresses) {
 				break
 			}
-			for index, p := range pg.Progresses {
+			pg.LineMoveUp(pg.TotalLine)
+			//println(pg.TotalLine)
+			//return
+			successNum = 0
+			for _, p := range pg.Progresses {
 				if p.Status() == PRO_SUCCESS {
 					successNum ++
 				}
-				if index == 0 {
-					pg.Progresses[0].show()
-					//pg.LineMoveDown(5)
-					//fmt.Println()
-				}
+				p.show()
+				fmt.Println()
 			}
+			pg.sleep()
 		}
-		//fmt.Println()
 	}()
 }
 
 func (pg *ProgressGroup) Wait() {
+	time.Sleep(time.Second * 2)
 	pg.wg.Wait()
+	pg.ShowCursor()
 }

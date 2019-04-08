@@ -3,6 +3,7 @@ package progressBar
 import (
 	"testing"
 	"time"
+	"github.com/hzxiao/goutil/assert"
 )
 
 var sleep = func() {
@@ -28,6 +29,7 @@ func TestProgress_Bar(t *testing.T) {
 			time.Sleep(10 * time.Millisecond)
 		}
 		nb.Wait()
+		assert.Equal(t, nb.Status(), PRO_SUCCESS)
 	}
 
 	{
@@ -41,6 +43,7 @@ func TestProgress_Bar(t *testing.T) {
 		}()
 		time.Sleep(time.Millisecond * 10)
 		nb.Wait()
+		assert.Equal(t, nb.Status(), PRO_SUCCESS)
 	}
 
 	{
@@ -52,6 +55,7 @@ func TestProgress_Bar(t *testing.T) {
 			time.Sleep(10 * time.Millisecond)
 		}
 		nb.Wait()
+		assert.Equal(t, nb.Status(), PRO_SUCCESS)
 	}
 
 	{
@@ -65,6 +69,7 @@ func TestProgress_Bar(t *testing.T) {
 		}()
 		time.Sleep(time.Millisecond * 10)
 		nb.Wait()
+		assert.Equal(t, nb.Status(), PRO_SUCCESS)
 	}
 }
 
@@ -122,6 +127,17 @@ func TestProcessGroup(t *testing.T) {
 		pg.Start()
 		go processRun(p1, count, 1, time.Millisecond*10)
 		go processRun(p2, count, 1, time.Millisecond*10)
+		sleep()
+		pg.Wait()
+
+		pg = NewProcessGroup()
+		p1 = NewBar(count, MODEL_NUMBER, "progressA: ", ".", true)
+		p2 = NewBar(count, MODEL_NUMBER, "progressB: ", ".", false)
+		pg.Add(p1)
+		pg.Add(p2)
+		pg.Start()
+		processRun(p1, count, 1, time.Millisecond*10)
+		processRun(p2, count, 1, time.Millisecond*10)
 		sleep()
 		pg.Wait()
 	}
