@@ -1,9 +1,10 @@
-# progress
+### Progress Bar
+
 A simple program implement the multi progress bar on shell.
 
-### Progress Bar
 progressBar is to support a progress bar displayed on the shell, support a single progress bar, also supports multiple progress bars, running on windows will be abnormal, because the AnsiEscapeCodes is not supported in the windows part, such as \033 [NA, etc
 
+![](https://github.com/tsdrm/progressBar/blob/master/multiProgress.gif)
 #### Basic Usage
 
 ##### Single Bar
