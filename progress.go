@@ -1,22 +1,22 @@
 package progressBar
 
 import (
-	"sync"
-	"time"
 	"fmt"
 	"strconv"
+	"sync"
+	"time"
 )
 
-type MODEL_TYPE int
+type ModelType int
 
 const (
-	MODEL_NUMBER  MODEL_TYPE = iota
-	MODEL_PROCESS
+	ModelNumber ModelType = iota
+	ModelProcess
 )
 
 const (
-	PRO_SUCCESS uint8 = iota
-	PRO_RUNNING
+	ProSuccess uint8 = iota
+	ProRunning
 )
 
 type Progress struct {
@@ -28,7 +28,7 @@ type Progress struct {
 	// whether to use percentage display
 	isPercentage bool
 	// display style, you can choose percentage or bar
-	Model MODEL_TYPE
+	Model ModelType
 	// prefix of progress
 	Prefix string
 	// suffix of progress
@@ -48,7 +48,7 @@ type Shower interface {
 	ShowFloatN(c, t, bitSize int, prefix, suffix string, isPercentage bool)
 }
 
-func NewBar(total int, model MODEL_TYPE, prefix, suffix string, isPercentage bool) *Progress {
+func NewBar(total int, model ModelType, prefix, suffix string, isPercentage bool) *Progress {
 	if total < 1 {
 		panic("Total must be greater than 0")
 	}
@@ -70,11 +70,11 @@ func NewBar(total int, model MODEL_TYPE, prefix, suffix string, isPercentage boo
 	return progress
 }
 
-func GetShower(model MODEL_TYPE) Shower {
+func GetShower(model ModelType) Shower {
 	switch model {
-	case MODEL_NUMBER:
+	case ModelNumber:
 		return Number{}
-	case MODEL_PROCESS:
+	case ModelProcess:
 		return Bar{}
 	default:
 		return Bar{}
@@ -133,9 +133,9 @@ func (p *Progress) Wait() {
 // Return status of progress, p.Current == p.Total represent process is success.
 func (p *Progress) Status() uint8 {
 	if p.Current == p.Total {
-		return PRO_SUCCESS
+		return ProSuccess
 	}
-	return PRO_RUNNING
+	return ProRunning
 }
 
 func (p *Progress) SetInterval(duration time.Duration) {
@@ -163,7 +163,7 @@ func NewProcessGroup() *ProgressGroup {
 
 func (pg *ProgressGroup) Add(p *Progress) {
 	pg.Progresses = append(pg.Progresses, p)
-	pg.TotalLine ++
+	pg.TotalLine++
 }
 
 func (pg *ProgressGroup) sleep() {
@@ -207,8 +207,8 @@ func (pg *ProgressGroup) Start() {
 			pg.LineMoveUp(pg.TotalLine)
 			successNum = 0
 			for _, p := range pg.Progresses {
-				if p.Status() == PRO_SUCCESS {
-					successNum ++
+				if p.Status() == ProSuccess {
+					successNum++
 				}
 				p.show()
 				fmt.Println()

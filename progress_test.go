@@ -1,9 +1,9 @@
 package progressBar
 
 import (
+	"github.com/hzxiao/goutil/assert"
 	"testing"
 	"time"
-	"github.com/hzxiao/goutil/assert"
 )
 
 var sleep = func() {
@@ -21,7 +21,7 @@ func TestProgress_Bar(t *testing.T) {
 	var count = 123
 	var nb *Progress
 	{
-		nb = NewBar(count, MODEL_NUMBER, "progress: ", "!!!!", false)
+		nb = NewBar(count, ModelNumber, "progress: ", "!!!!", false)
 		nb.Start()
 
 		for i := 0; i < count; i++ {
@@ -29,11 +29,11 @@ func TestProgress_Bar(t *testing.T) {
 			time.Sleep(10 * time.Millisecond)
 		}
 		nb.Wait()
-		assert.Equal(t, nb.Status(), PRO_SUCCESS)
+		assert.Equal(t, nb.Status(), ProSuccess)
 	}
 
 	{
-		nb = NewBar(count, MODEL_NUMBER, "progress: ", ".", false)
+		nb = NewBar(count, ModelNumber, "progress: ", ".", false)
 		nb.Start()
 		go func() {
 			for i := 0; i < count; i++ {
@@ -43,11 +43,11 @@ func TestProgress_Bar(t *testing.T) {
 		}()
 		time.Sleep(time.Millisecond * 10)
 		nb.Wait()
-		assert.Equal(t, nb.Status(), PRO_SUCCESS)
+		assert.Equal(t, nb.Status(), ProSuccess)
 	}
 
 	{
-		nb = NewBar(count, MODEL_NUMBER, "progress: ", "!!!!", true)
+		nb = NewBar(count, ModelNumber, "progress: ", "!!!!", true)
 		nb.Start()
 
 		for i := 0; i < count; i++ {
@@ -55,11 +55,11 @@ func TestProgress_Bar(t *testing.T) {
 			time.Sleep(10 * time.Millisecond)
 		}
 		nb.Wait()
-		assert.Equal(t, nb.Status(), PRO_SUCCESS)
+		assert.Equal(t, nb.Status(), ProSuccess)
 	}
 
 	{
-		nb = NewBar(count, MODEL_NUMBER, "progress: ", ".", true)
+		nb = NewBar(count, ModelNumber, "progress: ", ".", true)
 		nb.Start()
 		go func() {
 			for i := 0; i < count; i++ {
@@ -69,7 +69,7 @@ func TestProgress_Bar(t *testing.T) {
 		}()
 		time.Sleep(time.Millisecond * 10)
 		nb.Wait()
-		assert.Equal(t, nb.Status(), PRO_SUCCESS)
+		assert.Equal(t, nb.Status(), ProSuccess)
 	}
 }
 
@@ -83,14 +83,14 @@ func TestProcessGroup(t *testing.T) {
 		count = 145
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "A: ", "!!!", false)
+		p1 = NewBar(count, ModelNumber, "A: ", "!!!", false)
 		pg.Add(p1)
 		pg.Start()
 		processRun(p1, count, 2, time.Millisecond*10)
 		pg.Wait()
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "B: ", "!!!", false)
+		p1 = NewBar(count, ModelNumber, "B: ", "!!!", false)
 		pg.Add(p1)
 		pg.Start()
 		go processRun(p1, count, 2, time.Millisecond*10)
@@ -98,14 +98,14 @@ func TestProcessGroup(t *testing.T) {
 		pg.Wait()
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "C: ", "!!!", true)
+		p1 = NewBar(count, ModelNumber, "C: ", "!!!", true)
 		pg.Add(p1)
 		pg.Start()
 		processRun(p1, count, 2, time.Millisecond*10)
 		pg.Wait()
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "D: ", "!!!", true)
+		p1 = NewBar(count, ModelNumber, "D: ", "!!!", true)
 		pg.Add(p1)
 		pg.Start()
 		go processRun(p1, count, 2, time.Millisecond*10)
@@ -120,8 +120,8 @@ func TestProcessGroup(t *testing.T) {
 		count = 123
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "progressA: ", ".", true)
-		p2 = NewBar(count, MODEL_NUMBER, "progressB: ", ".", false)
+		p1 = NewBar(count, ModelNumber, "progressA: ", ".", true)
+		p2 = NewBar(count, ModelNumber, "progressB: ", ".", false)
 		pg.Add(p1)
 		pg.Add(p2)
 		pg.Start()
@@ -131,8 +131,8 @@ func TestProcessGroup(t *testing.T) {
 		pg.Wait()
 
 		pg = NewProcessGroup()
-		p1 = NewBar(count, MODEL_NUMBER, "progressA: ", ".", true)
-		p2 = NewBar(count, MODEL_NUMBER, "progressB: ", ".", false)
+		p1 = NewBar(count, ModelNumber, "progressA: ", ".", true)
+		p2 = NewBar(count, ModelNumber, "progressB: ", ".", false)
 		pg.Add(p1)
 		pg.Add(p2)
 		pg.Start()

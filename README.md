@@ -19,7 +19,7 @@ import (
 
 func main() {
     var total = 123
-	var b = pb.NewBar(total, pb.MODEL_NUMBER, "progress: [", "] !!!", false)
+	var b = pb.NewBar(total, pb.ModelNumber, "progress: [", "] !!!", false)
 	b.Start()
 
 	go func() {
@@ -51,8 +51,8 @@ var processRun = func(p *pb.Progress, count int, n int, interval time.Duration) 
 func main()  {
     var count = 145
     var pg = pb.NewProcessGroup()
-    var p1 = pb.NewBar(count, pb.MODEL_NUMBER, "progressA: [", "]!!!", true)
-    var p2 = pb.NewBar(count, pb.MODEL_NUMBER, "progressB: [", "]...", false)
+    var p1 = pb.NewBar(count, pb.ModelNumber, "progressA: [", "]!!!", true)
+    var p2 = pb.NewBar(count, pb.ModelNumber, "progressB: [", "]...", false)
     pg.Add(p1)
     pg.Add(p2)
     pg.Start()
